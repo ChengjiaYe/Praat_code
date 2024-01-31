@@ -1,0 +1,117 @@
+# Duration adjustment for word pairs
+# For the two words in one word pair, if their TextGrids have the same number of intervals in the same tier, 
+# average the duration of each corresponding interval and create a new sound and a new TextGrid based on soundfile 2.
+form Duration adjustment for word pairs
+	comment Directory of sound file 1
+	text soundfile1 07_VOORnaam
+	comment Directory of sound file 2
+	comment The new soundfile is based on sound file 2
+	text soundfile2 08_voorNAAM
+	comment Sound file extension
+	text extension .wav
+	comment Tier number
+	integer tier 1
+endform
+
+textGrid1$ = soundfile1$ + ".TextGrid"
+textGrid2$ = soundfile2$ + ".TextGrid"
+soundfile1$ = soundfile1$ + extension$
+soundfile2$ = soundfile2$ + extension$
+
+#Can use these two lines to check the variable: 
+#writeInfoLine: soundfile1$
+#writeInfoLine: soundfile2$
+
+sound1 = Read from file: soundfile1$
+sound2 = Read from file: soundfile2$
+textGrid1 = Read from file: textGrid1$
+textGrid2 = Read from file: textGrid2$
+
+select sound1
+word1_dur = Get total duration
+word1_int = Get intensity (dB)
+
+select sound2
+word2_dur = Get total duration
+word2_int = Get intensity (dB)
+
+select textGrid1
+intervalnum1 = Get number of intervals: tier
+select textGrid2
+intervalnum2 = Get number of intervals: tier
+if intervalnum1 <> intervalnum2
+	printline 'soundfile1$' has 'intervalnum1' intervals but 'soundfile1$' has 'intervalnum2' intervals.
+	exit
+endif
+
+for int to intervalnum1
+	select textGrid1
+	thisStart = Get start time of interval: tier, int
+	thisEnd = Get end time of interval: tier, int
+	word1_thisInt_startArray [int] = thisStart
+	word1_thisInt_endArray [int] = thisEnd
+	thisDur = thisEnd - thisStart
+	word1_thisInt_durArray [int] = thisDur
+
+	select textGrid2
+	thisStart = Get start time of interval: tier, int
+	thisEnd = Get end time of interval: tier, int
+	word2_thisInt_startArray [int] = thisStart
+	word2_thisInt_endArray [int] = thisEnd
+	thisDur = thisEnd - thisStart
+	word2_thisInt_durArray [int] = thisDur
+endfor
+
+select sound2
+To Manipulation: 0.01, 75, 600
+Extract duration tier
+for int to intervalnum2
+
+	start_of_1 = word1_thisInt_startArray [int]
+	end_of_1 = word1_thisInt_endArray [int]
+	dur_of_1 = word1_thisInt_durArray [int]
+
+	start_of_2 = word2_thisInt_startArray [int]
+	end_of_2 = word2_thisInt_endArray [int]
+	dur_of_2 = word2_thisInt_durArray [int]
+
+	new_start = (start_of_1 + start_of_2)/2
+	new_end = (end_of_1 + end_of_2)/2
+	scaledDur = (dur_of_1 + dur_of_2)/2
+	word2_thisInt_scaledDurArray [int] = scaledDur
+	durScaleFactor = scaledDur/dur_of_2
+	word2_thisInt_scaleFactorArray [int] = durScaleFactor
+	transition = 0.000005
+	Add point: (new_start + transition), durScaleFactor
+	Add point: (new_end - transition), durScaleFactor
+endfor
+
+manipulation = sound2 + 3
+#writeInfoLine: manipulation
+
+plusObject: manipulation
+Replace duration tier
+select manipulation
+Get resynthesis (overlap-add)
+Rename... 'newSound'
+Scale intensity... word2_int
+newDur = Get total duration
+#writeInfoLine: word2_int
+
+#Then we annotate the new sound file
+To TextGrid: "segment", ""
+newtg = manipulation + 3
+writeInfoLine: "sound1Dur	sound2Dur	newSoundDur"
+appendInfoLine: word1_dur, tab$, word2_dur, tab$, newDur, newline$
+appendInfoLine: "intNum	intName	word1dur	word2dur	scaledDur	durScaleFactor"
+for int to intervalnum2
+	new_end = (word1_thisInt_endArray [int] + word2_thisInt_endArray [int])/2 
+	Insert boundary: 1, new_end
+	select textGrid2
+	new_label$ = Get label of interval: 1, int
+	select newtg
+	Set interval text: 1, int, new_label$
+	appendInfoLine: int, tab$, new_label$, tab$, word1_thisInt_durArray[int], tab$, word2_thisInt_durArray [int], tab$, word2_thisInt_scaledDurArray [int], tab$, word2_thisInt_scaleFactorArray [int]
+endfor
+
+
