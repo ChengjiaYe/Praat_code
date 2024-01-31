@@ -101,8 +101,10 @@ newDur = Get total duration
 #Then we annotate the new sound file
 To TextGrid: "segment", ""
 newtg = manipulation + 3
-writeInfoLine: "sound1Dur	sound2Dur	newSoundDur"
-appendInfoLine: word1_dur, tab$, word2_dur, tab$, newDur, newline$
+offrate = round((newDur - (word1_dur + word2_dur)/2)/ ((word1_dur + word2_dur)/2) * 10000)
+offrate = offrate/10000
+writeInfoLine: "sound1Dur	sound2Dur	newSoundDur	differRate"
+appendInfoLine: word1_dur, tab$, word2_dur, tab$, newDur, tab$, offrate, newline$
 appendInfoLine: "intNum	intName	word1dur	word2dur	scaledDur	durScaleFactor"
 for int to intervalnum2
 	new_end = (word1_thisInt_endArray [int] + word2_thisInt_endArray [int])/2 
