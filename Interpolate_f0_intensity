@@ -1,0 +1,148 @@
+# Interpolate F0 and intensity continuum
+# For the two disyllabic words in a minimal pair of lexical stress with nearly the same duration and structure, 
+# this script interpolates the F0 and intensity contour linearly in n steps,
+# in which 1 and n are the original contours of word 1 (trochaic) and word 2 (iambic) respectively.
+# Note that the duration of the two words *must be* (nearly) the same.
+
+form Interpolate F0 and intensity continuum
+	comment Directory of sound file 1 (the trochaic word)
+	comment The new soundfile is based on sound file 1 
+	text soundfile1 07_adjusted_VOORnaam
+	comment Directory of sound file 2 (the iambic word)
+	text soundfile2 08_adjusted_voorNAAM
+	comment Sound file extension
+	text extension .wav
+	comment number of steps
+	integer num 7
+	comment Directory of the output sound files
+	text output 
+endform
+
+# Read files
+sound1 = Read from file: soundfile1$ + extension$
+sound2 = Read from file: soundfile2$ + extension$
+
+# Extract pitch tiers
+select sound1
+s1_dur = Get total duration
+int_1 = Get intensity (dB)
+To Pitch (filtered ac): 0.0, 50, 800, 15, 1, 0.03, 0.09, 0.50, 0.055, 0.35, 0.14
+pitch_sound = selected()
+plus sound1
+manipulation_s1 = To Manipulation
+pitchTier_s1 = Extract pitch tier
+removeObject: pitch_sound
+
+select sound2
+s2_dur = Get total duration
+int_2 = Get intensity (dB)
+To Pitch (filtered ac): 0.0, 50, 800, 15, 1, 0.03, 0.09, 0.50, 0.055, 0.35, 0.14
+pitch_sound = selected()
+plus sound2
+To Manipulation
+pitchTier_s2 = Extract pitch tier
+removeObject: pitch_sound
+
+# Extract the IntensityTier
+select sound1
+To Intensity: 100, 0, 0
+intensity = selected()
+intTier_s1 = Down to IntensityTier
+removeObject: intensity
+
+select sound2
+To Intensity: 100, 0, 0
+intensity = selected()
+intTier_s2 = Down to IntensityTier
+removeObject: intensity
+
+# Create 10 ms time bins for interpolation
+timebinsize = 0.01
+nbins = floor(s1_dur/timebinsize)
+
+for currentbin from 1 to nbins
+	currentbin_start = (currentbin-1)*timebinsize
+	currentbin_end = currentbin*timebinsize
+	currentbin_mid = (currentbin_start + currentbin_end)/2
+
+	select pitchTier_s1
+	f0_bin_s1[currentbin] = Get value at time... currentbin_mid
+	select pitchTier_s2
+	f0_bin_s2[currentbin] = Get value at time... currentbin_mid
+
+	select intTier_s1
+	int_bin_s1[currentbin] = Get value at time... currentbin_mid
+	select intTier_s2
+	int_bin_s2[currentbin] = Get value at time... currentbin_mid
+endfor
+
+# Interpolate pitch and intensity tiers
+for currentstep from 1 to num
+	select pitchTier_s1
+	Copy... f0step_'currentstep'
+
+	# Interpolate pitch
+	# First remove all original F0 points
+	Remove points between: 0, s1_dur
+	
+	# Then add a point for each time bin
+	for currentbin from 1 to nbins
+		currentbin_start = (currentbin-1)*timebinsize
+		currentbin_end = currentbin*timebinsize
+		currentbin_mid = (currentbin_start + currentbin_end)/2
+		currentbin_f0_diff = f0_bin_s1[currentbin] - f0_bin_s2[currentbin]
+		currentbin_f0_ratio = currentbin_f0_diff /(num-1)
+		currentbin_f0_interpol = f0_bin_s1[currentbin] - currentbin_f0_ratio * (currentstep-1)		
+		Add point: currentbin_mid, currentbin_f0_interpol
+	endfor
+	
+	# Replace the pitch contour from the orginal sound1
+	select manipulation_s1
+	Copy... f0step_'currentstep'
+	plusObject: "PitchTier f0step_'currentstep'"
+	Replace pitch tier
+	minusObject: "PitchTier f0step_'currentstep'"
+	Get resynthesis (overlap-add)
+	f0interpolated = selected()
+	removeObject: "PitchTier f0step_'currentstep'"
+
+
+	# Create an intensity tier for the sound with interpolated f0
+	To Intensity: 100, 0, 0
+	Down to IntensityTier
+	removeObject: (f0interpolated + 1)
+	select (f0interpolated + 2)
+	
+	# Interpolate intensity
+	# First make the intensity a flat line by multiplying its reverse
+	Formula... self*-1
+	reversed = selected()
+	plus f0interpolated
+	Multiply... yes
+	intensityflat = selected()
+	Rename... f0step_'currentstep'_intflat
+	removeObject: reversed
+	# Now we get a nearly flat line of intensity for each soundfile with manipulated f0
+	# We need to multiply this sound with the intensity line we need (to create a continuum) 
+	
+	# We now create the intensity line
+	select intTier_s1
+	Copy... intstep_'currentstep'
+	Remove points between... 0 's1_dur'
+	# Then add a point for each time bin
+	for currentbin from 1 to nbins
+		currentbin_start = (currentbin-1)*timebinsize
+		currentbin_end = currentbin*timebinsize
+		currentbin_mid = (currentbin_start + currentbin_end)/2
+		currentbin_int_diff = int_bin_s1[currentbin] - int_bin_s2[currentbin]
+		currentbin_int_ratio = currentbin_int_diff /(num-1)
+		currentbin_int_interpol = int_bin_s1[currentbin] - currentbin_int_ratio * (currentstep-1)
+				
+		Add point: currentbin_mid, currentbin_int_interpol
+	endfor
+	plus intensityflat
+	Multiply... yes
+	Scale intensity: (int_1 + int_2)/2
+	Rename... interpol_'currentstep'
+	Save as WAV file: "'output$'\interpol_'currentstep'.wav"		
+endfor
