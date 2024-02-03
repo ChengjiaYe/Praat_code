@@ -1,12 +1,18 @@
+##################################################################
+# Chengjia Ye
+# chengjia.ye@donders.ru.nl
+# January 2024
+##################################################################
+
 # Get time of the i-th point interval
 form Get time of the i-th point interval
 	comment Directory of sound files
 	text sound_directory ./Stimuli/
 	sentence Sound_file_extension .wav
-	#Relative directory:
-	#Going back to the father folder: ../Experiment 1/Stimuli/
-	#Opening a file in the current folder: Stimuli/
-	# "./" means "the current folder".
+	## Relative directory:
+	## Going back to the parent folder: ../Experiment 1/Stimuli/
+	## Opening a file in the current folder: Stimuli/
+	## "./" means "the current folder".
 	comment Directory of TextGrid files
 	text textGrid_directory ./Stimuli/
 	sentence TextGrid_file_extension .TextGrid
