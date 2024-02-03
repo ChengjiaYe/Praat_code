@@ -1,3 +1,14 @@
+##################################################################
+# Chengjia Ye
+# chengjia.ye@donders.ru.nl
+# February 2024
+# Adapted from Hans Rutger Bosker and Ronny Bujok
+# version 2
+# Update: Print the pitch and intensity values of each step to 
+# two .txt files, making it easier to check and to visualize.
+# If you do not need to visualize the results, use version 1.
+##################################################################
+
 # Interpolate F0 and intensity continuum
 # For the two disyllabic words in a minimal pair of lexical stress with nearly the same duration and structure, 
 # this script interpolates the F0 and intensity contour linearly in n steps,
