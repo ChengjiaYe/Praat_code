@@ -3,6 +3,11 @@
 # chengjia.ye@donders.ru.nl
 # February 2024
 # Adapted from Hans Rutger Bosker and Ronny Bujok
+# version 1
+# Update: There is also a verson 2 of this script which prints the 
+# the pitch and intensity values of each step to two .txt files, 
+# making it easier to check and to visualize. If that function is 
+# not needed, use the current script (version 1).
 ##################################################################
 
 # Interpolate F0 and intensity continuum
