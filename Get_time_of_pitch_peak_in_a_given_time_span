@@ -1,4 +1,10 @@
-﻿# Get time of the pitch peak in a given time span
+##################################################################
+# Chengjia Ye
+# chengjia.ye@donders.ru.nl
+# January 2024
+##################################################################
+
+# Get time of the pitch peak in a given time span
 form Get time of the pitch peak in a given time span
 	comment Directory of sound files
 	text sound_directory Stimuli/
