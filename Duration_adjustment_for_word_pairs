@@ -1,3 +1,10 @@
+##################################################################
+# Chengjia Ye
+# chengjia.ye@donders.ru.nl
+# January 2024
+# Adapted from Hans Rutger Bosker
+##################################################################
+
 # Duration adjustment for word pairs
 # For the two words in one word pair, if their TextGrids have the same number of intervals in the same tier, 
 # average the duration of each corresponding interval and create a new sound and a new TextGrid based on soundfile 2.
