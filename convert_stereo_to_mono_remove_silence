@@ -1,0 +1,67 @@
+form stereo to mono
+	comment Directory of sound files. Include the final "/".
+	text sound_directory Stimuli/
+	sentence Sound_file_extension .wav
+endform
+
+# Make a listing of all the sound files in a directory:
+Create Strings as file list... list 'sound_directory$'*'sound_file_extension$'
+numberOfFiles = Get number of strings
+
+# Open each sound file in the directory:
+for ifile from 1 to numberOfFiles
+	select Strings list
+	filename$ = Get string... ifile
+	Read from file... 'sound_directory$''filename$'
+
+	# get the name of the sound object:
+	soundname$ = selected$ ("Sound", 1)
+
+	# convert to mono and delete the original stereo sound
+	Convert to mono
+	select Sound 'soundname$'
+	Remove
+	filedelete 'sound_directory$'/'soundname$'.wav
+
+	mononame$ = soundname$ + "_mono"	
+	select Sound 'mononame$'
+
+	sound = selected()
+	intensity = To Intensity: 50, 0.01, "no"
+	textgrid = To TextGrid (silences): -25, 0.1, 0.075, "", "target"
+
+	selectObject: sound, textgrid
+	Extract intervals where: 1, "no", "contains", "target"
+
+	# Save the ID numbers of the currently selected intervals
+	total_parts = numberOfSelected()
+	for i to total_parts
+  		part[i] = selected(i)
+	endfor
+
+	# No need to make a copy just to rename
+	nosilence = Concatenate
+	Rename: string$(sound)
+
+	# Remove
+	selectObject: intensity, textgrid
+	# Including the extracted intervals
+	for i to total_parts
+  		plusObject: part[i]
+	endfor
+	Remove
+
+	selectObject: nosilence
+	# simplify the name if necessary
+	#length = length(soundname$) - 22
+	#newname$ = mid$ (soundname$, 23, length)
+	newname$ = soundname$
+	Rename... 'newname$'
+	Write to WAV file... 'sound_directory$'/'newname$'.wav
+	Remove
+	select Sound 'mononame$'
+	Remove
+endfor
+
+select Strings list
+Remove
