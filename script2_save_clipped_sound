@@ -1,0 +1,22 @@
+form save_clipped_sound
+	comment Directory of sound files. Include the final "/".
+	text sound_directory C:/Users/jason/desktop/2022.9/Tutorial 2 & MA Thesis/Vowel experiment/results/
+	sentence Sound_file_extension .wav
+endform
+
+# Make a listing of all the sound files in a directory:
+Create Strings as file list... list 'sound_directory$'*'sound_file_extension$'
+numberOfFiles = Get number of strings
+
+# Write each sound file to the directory:
+for ifile from 1 to numberOfFiles
+	select Strings list
+	soundname$ = Get string... ifile
+	soundname$ = replace$ (soundname$, sound_file_extension$, "", 0)
+	select Sound 'soundname$'
+	Write to WAV file... 'sound_directory$'/'soundname$'.wav
+	Remove
+endfor
+
+select Strings list
+Remove
