@@ -1,7 +1,17 @@
-form save_clipped_sound
+##################################################################
+# Chengjia Ye
+# chengjia.ye@donders.ru.nl
+# June 2023
+##################################################################
+
+# This script automatically reads soundfiles in a given directory
+# and saves manually edited/adjusted sounds from Praat back to the directory.
+# This is realized with removing the original soundfiles.
+
+form save_edited_sound
 	comment Directory of sound files. Include the final "/".
-	text sound_directory C:/Users/jason/desktop/2022.9/Tutorial 2 & MA Thesis/Vowel experiment/results/
-	sentence Sound_file_extension .wav
+	text sound_directory results/
+	sentence sound_file_extension .wav
 endform
 
 # Make a listing of all the sound files in a directory:
