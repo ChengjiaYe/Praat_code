@@ -1,4 +1,9 @@
-form stereo to mono
+# This script converts all stereosounds in a directory to monosounds by replacing the orginal sterosounds,
+# It can also remove the silence part by concatenating the nonsilent parts together.
+# This script is adapted from a question on Stackoverflow:
+# https://stackoverflow.com/questions/34770105/praat-script-to-remove-silence-cannot-select-and-remove-objects
+
+form Convert stereo to mono and remove silence 
 	comment Directory of sound files. Include the final "/".
 	text sound_directory Stimuli/
 	sentence Sound_file_extension .wav
@@ -14,10 +19,10 @@ for ifile from 1 to numberOfFiles
 	filename$ = Get string... ifile
 	Read from file... 'sound_directory$''filename$'
 
-	# get the name of the sound object:
+	# Get the name of the sound object:
 	soundname$ = selected$ ("Sound", 1)
 
-	# convert to mono and delete the original stereo sound
+	# Convert to mono and delete the original stereo sound
 	Convert to mono
 	select Sound 'soundname$'
 	Remove
@@ -52,11 +57,14 @@ for ifile from 1 to numberOfFiles
 	Remove
 
 	selectObject: nosilence
-	# simplify the name if necessary
+	
+	# Simplify the name if necessary
 	#length = length(soundname$) - 22
 	#newname$ = mid$ (soundname$, 23, length)
 	newname$ = soundname$
 	Rename... 'newname$'
+
+	# Otherwise no need to adjust the four lines above, directly write to WAV file
 	Write to WAV file... 'sound_directory$'/'newname$'.wav
 	Remove
 	select Sound 'mononame$'
