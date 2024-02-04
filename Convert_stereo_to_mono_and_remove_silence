@@ -1,4 +1,4 @@
-# This script converts all stereosounds in a directory to monosounds by replacing the orginal sterosounds,
+# This script converts all stereosounds in a directory to monosounds by replacing the orginal stereosounds,
 # It can also remove the silence part by concatenating the nonsilent parts together.
 # This script is adapted from a question on Stackoverflow:
 # https://stackoverflow.com/questions/34770105/praat-script-to-remove-silence-cannot-select-and-remove-objects
