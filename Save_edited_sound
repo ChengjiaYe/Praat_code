@@ -8,7 +8,7 @@
 # and saves manually edited/adjusted sounds from Praat back to the directory.
 # This is realized with removing the original soundfiles.
 
-form save_edited_sound
+form Save_edited_sound
 	comment Directory of sound files. Include the final "/".
 	text sound_directory results/
 	sentence sound_file_extension .wav
