@@ -1,9 +1,19 @@
+##################################################################
+# Chengjia Ye
+# chengjia.ye@donders.ru.nl
+# June 2023
+##################################################################
+
+# This script extracts duration, F1 and F2 at the midpoint and the upperquartile,
+# and calculates the first two harmonics (H1 and H2) and their difference 
+# based on the first three detectable periods. The results are printed to the resultfile.
+
 form Get duration formant and spectrum
 	comment Directory of sound files. Include the final "/".
-	text sound_directory C:/Users/jason/desktop/2022.9/Tutorial 2 & MA Thesis/Vowel experiment/results/
+	text sound_directory results/
 	sentence Sound_file_extension .wav
 	comment Path of the resulting text file:
-	text resultsfile C:/Users/jason/desktop/2022.9/Tutorial 2 & MA Thesis/resultsfile.txt
+	text resultsfile resultsfile.txt
 
 	comment Formant analysis parameters
 	positive Time_step 0.005
